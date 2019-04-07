@@ -257,7 +257,30 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+  /*
+  * Number of bits required is log2(x) + 1 sign bit. 
+  * Find log2 by >> and incrementing a counter.
+  * To speed things up we can do a divide & conquer method by comparing and shifting powers of 2 (like Binary Search) 
+  * More Details : http://www-graphics.stanford.edu/~seander/bithacks.html#IntegerLog
+  */
+  int signBit, result, shift;
+  signBit = (x>>31);
+  x = (~x & signBit) | (x & ~signBit);
+  result = !!(x >> 16) << 4; 
+  x = x >> result;
+  shift = !!(x >> 8) << 3; 
+  x = x >> shift;
+  result = result | shift;
+  shift = !!(x >> 4) << 2; 
+  x = x >> shift;
+  result = result | shift;
+  shift = !!(x >> 2) << 1; 
+  x = x >> shift;
+  result = result | shift;
+  result = result | (x >> 1);
+  shift = !!(x >> 1);
+  x = x >> shift;
+  return (result + x + 1);          // +1 for the sign bit
 }
 //float
 /* 
@@ -272,7 +295,16 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  return 2;
+  int frac, exp, sign, arg;
+  if(uf == 0x00) return uf;  
+  arg = uf;
+  sign = (1<<31) & uf;
+  uf = uf & ~(1<<31);
+  frac = ~((~0)<<23) & uf;
+  exp = (((~0)<<22) & uf) >> 23;
+  if(exp == 0xFF || (frac == 0x00 && exp == 0x00)) return arg;
+  if (exp == 0x00) return sign | (exp << 23) | ((frac <<1) & 0xFFFFFF);
+  return sign | ((exp +1) << 23) | frac ;
 }
 /* 
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
