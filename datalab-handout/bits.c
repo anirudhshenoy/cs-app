@@ -318,9 +318,8 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  if (uf == 0) return 0;
-  int frac, exp, sign, arg;
-  arg = uf;
+  int frac, exp, sign;
+  if (uf == 0) return 0; 
   sign = (uf >> 31) & 0x1;
   uf = uf & ~(1<<31);
   frac = ~((~0)<<23) & uf;
@@ -348,36 +347,11 @@ int floatFloat2Int(unsigned uf) {
  *   Rating: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+    int INF = 0x7f800000;
+    if (x > 128) return INF;
+    if (x < -128) return 0;
+    return (x+127) << 23;
 }
 
 
 
-/*
-uf = 0x3f800000;
-  int frac, sign, exp, round, twoTo30;
-  sign = (uf>>31) & 0x1;
-  uf = uf & ~(1<<31);
-  frac = ~((~0)<<23) & uf;
-  exp = (((~0)<<22) & uf) >> 23;
-  if (exp == 0xFF) return 0x80000000u;
-  if (exp != 0x00) frac += (1<<24);
-  else return 0x00;
-  exp -= 127;
-  if(exp > 31) return 0x80000000u;
-  if (sign) frac = -frac;
-  if(exp> 24) return frac<<(exp-24);
-  if(exp<(~0)) return 0;
-  round = frac <<(8+exp);
-  frac = frac >> (24-exp);
-  twoTo30 = (1<<30);
-  if(round >= twoTo30){
-    if(round == twoTo30){
-      frac += (frac & 0x1);
-    }
-    else{
-      frac +=1;
-    }
-  }
-  return frac;
-  */
