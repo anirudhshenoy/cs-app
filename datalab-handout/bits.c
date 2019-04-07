@@ -12,7 +12,6 @@
  * it's not good practice to ignore compiler warnings, but in this
  * case it's OK.  
  */
-
 #if 0
 /*
  * Instructions to Students:
@@ -319,7 +318,21 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  return 2;
+  if (uf == 0) return 0;
+  int frac, exp, sign, arg;
+  arg = uf;
+  sign = (uf >> 31) & 0x1;
+  uf = uf & ~(1<<31);
+  frac = ~((~0)<<23) & uf;
+  exp = (((~0)<<22) & uf) >> 23;
+  exp -=127;
+  frac = frac | (1<<23);
+  if(exp >32) return (1<<31); 
+  if(exp < 0) return 0;
+  if (exp <= 22) frac >>= 23-exp;
+  else frac <<= exp-23;
+  if (sign) frac = ~frac + 1;  
+  return frac;
 }
 /* 
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
@@ -337,3 +350,34 @@ int floatFloat2Int(unsigned uf) {
 unsigned floatPower2(int x) {
     return 2;
 }
+
+
+
+/*
+uf = 0x3f800000;
+  int frac, sign, exp, round, twoTo30;
+  sign = (uf>>31) & 0x1;
+  uf = uf & ~(1<<31);
+  frac = ~((~0)<<23) & uf;
+  exp = (((~0)<<22) & uf) >> 23;
+  if (exp == 0xFF) return 0x80000000u;
+  if (exp != 0x00) frac += (1<<24);
+  else return 0x00;
+  exp -= 127;
+  if(exp > 31) return 0x80000000u;
+  if (sign) frac = -frac;
+  if(exp> 24) return frac<<(exp-24);
+  if(exp<(~0)) return 0;
+  round = frac <<(8+exp);
+  frac = frac >> (24-exp);
+  twoTo30 = (1<<30);
+  if(round >= twoTo30){
+    if(round == twoTo30){
+      frac += (frac & 0x1);
+    }
+    else{
+      frac +=1;
+    }
+  }
+  return frac;
+  */
